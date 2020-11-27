@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+
+  nginx:
+    build:
+      context: .container/nginx
+    container_name: ${PROJECT_ID}_nginx
+    env_file:
+      - .container/nginx/conf/nginx.env
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - .container/nginx/conf/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - mariadb
+      - drupal
+    networks:
+      - drupal
+
+  drupal:
+    build:
+      context: .container/drupal
+    container_name: ${PROJECT_ID}_drupal
+    env_file:
+      - .container/mariadb/conf/mysql.env
+      - .container/drupal/conf/drupal.env
+    depends_on:
+      - mariadb
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - drupal
+
+  mariadb:
+    build:
+      context: .container/mariadb
+    container_name: ${PROJECT_ID}_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - drupal
+
+volumes:
+  mariadb-data:
+
+networks:
+  drupal:
