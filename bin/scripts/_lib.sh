@@ -42,3 +42,14 @@ function print_info()
 {
   printf "${blue}${bold}${info}${reset} - %s \n" "$1"
 }
+
+function print_title() 
+{
+  printf "${blue}========== %s ==========${reset}\n" "${1}"
+}
+
+break_message()
+{
+  print_error "${1}"
+  exit 1
+}

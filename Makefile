@@ -11,8 +11,11 @@
 # Project containers management.
 #
 ###
-build: ## Build and up container
-	bin/scripts/build_env.sh
+env-build: ## Build and up container
+	bin/scripts/build_env.sh --build
+
+env-purge: ## Clean env and src files and docker container
+	bin/scripts/build_env.sh --purge
 
 start: ## Start project containers.
 	docker-compose up -d
@@ -29,4 +32,4 @@ status: ## Print project status.
 tty: ## Enter container shell
 	docker-compose exec $(filter-out $@,$(MAKECMDGOALS)) bash
 
-.PHONY: build start stop restart status
+.PHONY: env-build env-purge start stop restart status tty
