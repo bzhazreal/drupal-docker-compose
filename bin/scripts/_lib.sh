@@ -48,8 +48,64 @@ function print_title()
   printf "${blue}========== %s ==========${reset}\n" "${1}"
 }
 
-break_message()
+function break_message()
 {
   print_error "${1}"
   exit 1
+}
+
+###
+#
+# File.
+#
+###
+
+# Check directory content.
+# Return 0 if empty or 1.
+function directory_is_empty()
+{
+  if [ -z "$(ls -A $1)" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+###
+#
+# Interactions.
+#
+###
+
+###
+#
+# Function to display a question and configure output.
+#
+###
+function binary_question()
+{
+
+  while getopts :q:o:f option; do
+    case "${option}" in
+        q) QUESTION=${OPTARG};;
+        o) ANSWER_TRUE=${OPTARG};;
+        f) ANSWER_FALSE=${OPTARG};;
+    esac
+  done
+
+  if [ -z "${QUESTION}" ]  || [ -z "${ANSWER_TRUE}" ] || [ -z "${ANSWER_FALSE}" ];then
+    break_message "Missing argument."
+  fi
+
+  while true; do
+    read -r -p "$(echo -e "${red}${bold}Warning : ${QUESTION}. Are you sure (n/y) ?${reset}")" RESPONSE
+    if [[ "${RESPONSE}" == "n" || "${RESPONSE}" == "N" ]];then
+      return 1
+    elif [[ "${RESPONSE}" == "y" || "${RESPONSE}" == "Y" ]];then
+      return 0
+    else
+      continue
+    fi
+  done
+
 }

@@ -5,8 +5,39 @@ export ROOT_DIRECTORY="$(dirname "$(dirname "${SCRIPT_DIRECTORY}")")"
 
 source "${SCRIPT_DIRECTORY}"/_lib.sh
 
-if [[ "$@" == "--build" ]];then
 
+function manage_env()
+{
+
+  case "$@" in
+    
+    "--build")
+      _build_env
+    ;;
+
+    "--purge")
+      _purge_env
+    ;;
+    
+    *)
+      print_error "Command not found"
+    ;;
+  esac
+
+}
+
+###
+#
+# Env creation.
+#
+# Actions :
+# - Create env file with default values when no one has been set.
+# - Create src directory if not exist.
+# - Build local containers if not exist.
+#
+###
+function _build_env()
+{
   print_title "Build environment"
   
   if [ ! -f "${ROOT_DIRECTORY}"/.env ];then
@@ -24,9 +55,20 @@ if [[ "$@" == "--build" ]];then
 
   cd "${ROOT_DIRECTORY}"
   docker-compose up --build -d
+}
 
-elif [[ "$@" == "--purge" ]];then
-
+###
+#
+# Clear env.
+#
+# Actions :
+# - Purge all containers.
+# - Delete local env files.
+# - Delete src directory.
+#
+###
+function _purge_env
+{
   print_title "Purge environment"
 
   while true; do
@@ -40,6 +82,8 @@ elif [[ "$@" == "--purge" ]];then
     fi
   done
 
+  response="$(binary_question -q 'the question' -o 'ok' -f 'ko' )"
+
   docker-compose down --rmi all --remove-orphans -v || break_message "Fail to purge containers"
   print_success "Containers delete with success"
 
@@ -49,5 +93,11 @@ elif [[ "$@" == "--purge" ]];then
     break_message "Failed to delete files"
   fi
   print_success "Files delete with success"
+}
 
-fi
+###
+#
+# Entrypoint
+#
+###
+manage_env "$@"
